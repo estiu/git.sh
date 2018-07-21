@@ -1,20 +1,11 @@
 if [[ -n $ENABLE_GIT_SH_ALIASES ]]; then
-  alias ch='git cherry-pick -n'
-  alias gist="gist -p | pbcopy"
-  alias m-="git merge -"
-  alias st='git status'
-  alias stash="git add -A > /dev/null; git stash > /dev/null"
-  alias t="git"
-fi
-
-if [[ -n $ENABLE_GIT_SH_SHORTFNS ]]; then
   alias A="git_sh_A"
   alias allmine="git_sh_allmine"
   alias amend="git_sh_amend"
   alias backup_branch="git_sh_backup_branch"
   alias br="git_sh_br"
-  alias c-="git_s_h-"
-  alias c--="git_sh_--"
+  alias c-="git_sh_c-"
+  alias c--="git_sh_c--"
   alias cln="git_sh_cln"
   alias co="git_sh_co"
   alias commit_count="git_sh_commit_count"
@@ -52,31 +43,31 @@ git_sh_backup_branch(){
   fi
 }
 
-# suggested alias: `A`. Enable it with ENABLE_GIT_SH_SHORTFNS
+# suggested alias: `A`. Enable it with ENABLE_GIT_SH_ALIASES
 git_sh_A () {
   git add -A
 }
 
-# suggested alias: `c-`. Enable it with ENABLE_GIT_SH_SHORTFNS
+# suggested alias: `c-`. Enable it with ENABLE_GIT_SH_ALIASES
 git_sh_c- () {
   git_sh_backup_branch
   git checkout -
 }
 
-# suggested alias: `c--`. Enable it with ENABLE_GIT_SH_SHORTFNS
+# suggested alias: `c--`. Enable it with ENABLE_GIT_SH_ALIASES
 git_sh_c-- () {
   git checkout -
   git checkout -
 }
 
-# suggested alias: `sap`. Enable it with ENABLE_GIT_SH_SHORTFNS
+# suggested alias: `sap`. Enable it with ENABLE_GIT_SH_ALIASES
 git_sh_sap (){
   git stash apply
 }
 
-# suggested alias: `log`. Enable it with ENABLE_GIT_SH_SHORTFNS
+# suggested alias: `log`. Enable it with ENABLE_GIT_SH_ALIASES
 git_sh_log(){
-  git $1 log --no-merges --pretty=format:'%Cred%h%Creset -%Creset %s %Cgreen(%cr) %C(bold blue)%an%Creset' --abbrev-commit $2
+  git $1 log --no-merges --pretty=format:'%Cred%h%Creset -%Creset %sXXX%bXXX %Cgreen(%cr) %C(bold blue)%an%Creset' --abbrev-commit $2 | ruby -e 'puts STDIN.read.to_s.gsub("XXXXXX", "").gsub(/XXX.+?XXX/m, " \e[31m(+)\e[0m") rescue nil' | less 2> /dev/null
 }
 
 git_sh_current_branch(){
@@ -166,6 +157,10 @@ git_sh_remove_branch(){
   echo "$@" | xargs git_sh_delete_remote_branch
 }
 
+git_sh_delete_remote_branch(){
+  git push origin ":$1" --force > /dev/null 2>&1
+}
+
 git_sh_delete_origin(){
   git_sh_delete_remote_branch $(git_sh_current_branch)
 }
@@ -213,7 +208,7 @@ git_sh_amend (){
 
 git_sh_rebase (){
   git_sh_backup_branch
-  git rebase "@"
+  git rebase "$@"
 }
 
 # Rewrites all commits using your current name/email.
@@ -245,7 +240,7 @@ git_sh_msg(){
 }
 
 # Good for when you are merging, and you are OK with the default auto-generated "merge commit" message.
-# i.e skips the tedious multi-step process of attempting to commit, then `vim`-img a prefilled message.
+# i.e skips the tedious multi-step process of attempting to commit, then `vim`-ing a prefilled message.
 git_sh_E() {
   EDITOR=true git commit
 }
